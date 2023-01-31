@@ -24,12 +24,20 @@ impl FromInner<c::sockaddr_in> for SocketAddrV4 {
 
 impl FromInner<c::sockaddr_in6> for SocketAddrV6 {
     fn from_inner(addr: c::sockaddr_in6) -> SocketAddrV6 {
-        SocketAddrV6::new(
+        #[cfg(not(target_os = "zephyr"))]
+        return SocketAddrV6::new(
             Ipv6Addr::from_inner(addr.sin6_addr),
             u16::from_be(addr.sin6_port),
             addr.sin6_flowinfo,
             addr.sin6_scope_id,
-        )
+        );
+        #[cfg(target_os = "zephyr")]
+        return SocketAddrV6::new(
+            Ipv6Addr::from_inner(addr.sin6_addr),
+            u16::from_be(addr.sin6_port),
+            Default::default(),
+            addr.sin6_scope_id as u32,
+        );
     }
 }
 
@@ -46,14 +54,24 @@ impl IntoInner<c::sockaddr_in> for SocketAddrV4 {
 
 impl IntoInner<c::sockaddr_in6> for SocketAddrV6 {
     fn into_inner(self) -> c::sockaddr_in6 {
-        c::sockaddr_in6 {
+        #[cfg(not(target_os = "zephyr"))]
+        return c::sockaddr_in6 {
             sin6_family: c::AF_INET6 as c::sa_family_t,
             sin6_port: self.port().to_be(),
             sin6_addr: self.ip().into_inner(),
             sin6_flowinfo: self.flowinfo(),
             sin6_scope_id: self.scope_id(),
             ..unsafe { mem::zeroed() }
-        }
+        };
+
+        #[cfg(target_os = "zephyr")]
+        return c::sockaddr_in6 {
+            sin6_family: c::AF_INET6 as c::sa_family_t,
+            sin6_port: self.port().to_be(),
+            sin6_addr: self.ip().into_inner(),
+            sin6_scope_id: self.scope_id() as u8,
+            ..unsafe { mem::zeroed() }
+        };
     }
 }
 

@@ -447,7 +447,7 @@ impl FileAttr {
 
 #[cfg(not(any(target_os = "netbsd", target_os = "nto")))]
 impl FileAttr {
-    #[cfg(not(any(target_os = "vxworks", target_os = "espidf", target_os = "horizon")))]
+    #[cfg(not(any(target_os = "vxworks", target_os = "espidf", target_os = "horizon", target_os = "zephyr")))]
     pub fn modified(&self) -> io::Result<SystemTime> {
         #[cfg(target_pointer_width = "32")]
         cfg_has_statx! {
@@ -459,7 +459,7 @@ impl FileAttr {
         Ok(SystemTime::new(self.stat.st_mtime as i64, self.stat.st_mtime_nsec as i64))
     }
 
-    #[cfg(any(target_os = "vxworks", target_os = "espidf"))]
+    #[cfg(any(target_os = "vxworks", target_os = "espidf", target_os = "zephyr"))]
     pub fn modified(&self) -> io::Result<SystemTime> {
         Ok(SystemTime::new(self.stat.st_mtime as i64, 0))
     }
@@ -469,7 +469,7 @@ impl FileAttr {
         Ok(SystemTime::from(self.stat.st_mtim))
     }
 
-    #[cfg(not(any(target_os = "vxworks", target_os = "espidf", target_os = "horizon")))]
+    #[cfg(not(any(target_os = "vxworks", target_os = "espidf", target_os = "horizon", target_os = "zephyr")))]
     pub fn accessed(&self) -> io::Result<SystemTime> {
         #[cfg(target_pointer_width = "32")]
         cfg_has_statx! {
@@ -481,7 +481,7 @@ impl FileAttr {
         Ok(SystemTime::new(self.stat.st_atime as i64, self.stat.st_atime_nsec as i64))
     }
 
-    #[cfg(any(target_os = "vxworks", target_os = "espidf"))]
+    #[cfg(any(target_os = "vxworks", target_os = "espidf", target_os = "zephyr"))]
     pub fn accessed(&self) -> io::Result<SystemTime> {
         Ok(SystemTime::new(self.stat.st_atime as i64, 0))
     }
@@ -867,6 +867,7 @@ impl DirEntry {
         target_os = "espidf",
         target_os = "horizon",
         target_os = "nto",
+        target_os = "zephyr",
     ))]
     pub fn ino(&self) -> u64 {
         self.entry.d_ino as u64
@@ -1185,7 +1186,7 @@ impl File {
     }
 
     pub fn set_times(&self, times: FileTimes) -> io::Result<()> {
-        #[cfg(not(any(target_os = "redox", target_os = "espidf", target_os = "horizon")))]
+        #[cfg(not(any(target_os = "redox", target_os = "espidf", target_os = "horizon", target_os = "zephyr")))]
         let to_timespec = |time: Option<SystemTime>| {
             match time {
                 Some(time) if let Some(ts) = time.t.to_timespec() => Ok(ts),
@@ -1195,7 +1196,7 @@ impl File {
             }
         };
         cfg_if::cfg_if! {
-            if #[cfg(any(target_os = "redox", target_os = "espidf", target_os = "horizon"))] {
+            if #[cfg(any(target_os = "redox", target_os = "espidf", target_os = "horizon", target_os = "zephyr"))] {
                 // Redox doesn't appear to support `UTIME_OMIT`.
                 // ESP-IDF and HorizonOS do not support `futimens` at all and the behavior for those OS is therefore
                 // the same as for Redox.
@@ -1510,7 +1511,7 @@ pub fn link(original: &Path, link: &Path) -> io::Result<()> {
     run_path_with_cstr(original, |original| {
         run_path_with_cstr(link, |link| {
             cfg_if::cfg_if! {
-                if #[cfg(any(target_os = "vxworks", target_os = "redox", target_os = "android", target_os = "espidf", target_os = "horizon"))] {
+                if #[cfg(any(target_os = "vxworks", target_os = "redox", target_os = "android", target_os = "espidf", target_os = "horizon", target_os = "zephyr"))] {
                     // VxWorks, Redox and ESP-IDF lack `linkat`, so use `link` instead. POSIX leaves
                     // it implementation-defined whether `link` follows symlinks, so rely on the
                     // `symlink_hard_link` test in library/std/src/fs/tests.rs to check the behavior.
@@ -1817,6 +1818,7 @@ pub use remove_dir_impl::remove_dir_all;
     target_os = "espidf",
     target_os = "horizon",
     target_os = "nto",
+    target_os = "zephyr",
     miri
 ))]
 mod remove_dir_impl {
@@ -1829,6 +1831,7 @@ mod remove_dir_impl {
     target_os = "espidf",
     target_os = "horizon",
     target_os = "nto",
+    target_os = "zephyr",
     miri
 )))]
 mod remove_dir_impl {

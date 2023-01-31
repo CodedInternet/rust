@@ -136,12 +136,12 @@ pub fn error_string(errno: i32) -> String {
     }
 }
 
-#[cfg(target_os = "espidf")]
+#[cfg(any(target_os = "espidf", target_os = "zephyr"))]
 pub fn getcwd() -> io::Result<PathBuf> {
     Ok(PathBuf::from("/"))
 }
 
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "zephyr")))]
 pub fn getcwd() -> io::Result<PathBuf> {
     let mut buf = Vec::with_capacity(512);
     loop {
@@ -168,12 +168,12 @@ pub fn getcwd() -> io::Result<PathBuf> {
     }
 }
 
-#[cfg(target_os = "espidf")]
+#[cfg(any(target_os = "espidf", target_os = "zephyr"))]
 pub fn chdir(p: &path::Path) -> io::Result<()> {
     super::unsupported::unsupported()
 }
 
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "zephyr")))]
 pub fn chdir(p: &path::Path) -> io::Result<()> {
     let result = run_path_with_cstr(p, |p| unsafe { Ok(libc::chdir(p.as_ptr())) })?;
     if result == 0 { Ok(()) } else { Err(io::Error::last_os_error()) }
@@ -460,7 +460,8 @@ pub fn current_exe() -> io::Result<PathBuf> {
     path.canonicalize()
 }
 
-#[cfg(any(target_os = "espidf", target_os = "horizon"))]
+#[cfg(any(target_os = "\
+", target_os = "horizon", target_os = "zephyr"))]
 pub fn current_exe() -> io::Result<PathBuf> {
     super::unsupported::unsupported()
 }
@@ -614,7 +615,8 @@ pub fn home_dir() -> Option<PathBuf> {
         target_os = "redox",
         target_os = "vxworks",
         target_os = "espidf",
-        target_os = "horizon"
+        target_os = "horizon",
+        target_os = "zephyr"
     ))]
     unsafe fn fallback() -> Option<OsString> {
         None
@@ -627,7 +629,8 @@ pub fn home_dir() -> Option<PathBuf> {
         target_os = "redox",
         target_os = "vxworks",
         target_os = "espidf",
-        target_os = "horizon"
+        target_os = "horizon",
+        target_os = "zephyr"
     )))]
     unsafe fn fallback() -> Option<OsString> {
         let amt = match libc::sysconf(libc::_SC_GETPW_R_SIZE_MAX) {

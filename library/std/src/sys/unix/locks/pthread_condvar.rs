@@ -38,7 +38,7 @@ impl LazyInit for AllocatedCondvar {
                 target_os = "redox"
             ))] {
                 // `pthread_condattr_setclock` is unfortunately not supported on these platforms.
-            } else if #[cfg(any(target_os = "espidf", target_os = "horizon"))] {
+            } else if #[cfg(any(target_os = "espidf", target_os = "horizon", target_os = "zephyr"))] {
                 // NOTE: ESP-IDF's PTHREAD_COND_INITIALIZER support is not released yet
                 // So on that platform, init() should always be called
                 // Moreover, that platform does not have pthread_condattr_setclock support,
@@ -127,7 +127,8 @@ impl Condvar {
         target_os = "watchos",
         target_os = "android",
         target_os = "espidf",
-        target_os = "horizon"
+        target_os = "horizon",
+        target_os = "zephyr"
     )))]
     pub unsafe fn wait_timeout(&self, mutex: &Mutex, dur: Duration) -> bool {
         use crate::sys::time::Timespec;
@@ -161,7 +162,8 @@ impl Condvar {
         target_os = "watchos",
         target_os = "android",
         target_os = "espidf",
-        target_os = "horizon"
+        target_os = "horizon",
+        target_os = "zephyr"
     ))]
     pub unsafe fn wait_timeout(&self, mutex: &Mutex, dur: Duration) -> bool {
         use crate::sys::time::SystemTime;

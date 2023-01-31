@@ -77,6 +77,8 @@ mod platform {
     pub use crate::os::vxworks::*;
     #[cfg(target_os = "watchos")]
     pub use crate::os::watchos::*;
+    #[cfg(target_os = "zephyr")]
+    pub use crate::os::zephyr::*;
 }
 
 pub mod ffi;

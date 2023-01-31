@@ -15,7 +15,12 @@ use crate::sys_common::{AsInner, AsInnerMut, FromInner, IntoInner};
 use cfg_if::cfg_if;
 
 cfg_if! {
-    if #[cfg(any(target_os = "vxworks", target_os = "espidf", target_os = "horizon"))] {
+    if #[cfg(any(
+        target_os = "vxworks",
+        target_os = "espidf",
+        target_os = "horizon",
+        target_os = "zephyr",
+    ))] {
         type UserId = u16;
         type GroupId = u16;
     } else if #[cfg(target_os = "nto")] {
