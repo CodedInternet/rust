@@ -49,6 +49,7 @@ unsafe fn wait_timeout(
         target_os = "watchos",
         target_os = "espidf",
         target_os = "horizon",
+        target_os = "zephyr",
     ))]
     let (now, dur) = {
         use crate::cmp::min;
@@ -76,6 +77,7 @@ unsafe fn wait_timeout(
         target_os = "watchos",
         target_os = "espidf",
         target_os = "horizon",
+        target_os = "zephyr",
     )))]
     let (now, dur) = {
         use crate::sys::time::Timespec;
@@ -126,7 +128,7 @@ impl Parker {
                 target_os = "redox"
             ))] {
                 addr_of_mut!((*parker).cvar).write(UnsafeCell::new(libc::PTHREAD_COND_INITIALIZER));
-            } else if #[cfg(any(target_os = "espidf", target_os = "horizon"))] {
+            } else if #[cfg(any(target_os = "espidf", target_os = "horizon", target_os = "zephyr",))] {
                 let r = libc::pthread_cond_init(addr_of_mut!((*parker).cvar).cast(), crate::ptr::null());
                 assert_eq!(r, 0);
             } else {
