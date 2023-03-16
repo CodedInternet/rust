@@ -169,7 +169,7 @@ pub fn getcwd() -> io::Result<PathBuf> {
 }
 
 #[cfg(any(target_os = "espidf", target_os = "zephyr"))]
-pub fn chdir(p: &path::Path) -> io::Result<()> {
+pub fn chdir(_p: &path::Path) -> io::Result<()> {
     super::unsupported::unsupported()
 }
 
